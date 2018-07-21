@@ -1,0 +1,19 @@
+# camera and data
+IsDebug: True
+DatasetPath: "/home/qie/Downloads/datasets/rgbd_dataset_freiburg1_xyz"
+ImagesPath: "rgb"
+DepthPath: "depth"
+ImagesName: "img_names.txt"
+DepthsName: "depth_names.txt"
+ImagesExt: ".png"
+IntrinsicPath: "../config/cameraIntrinsic.txt"
+DistortionPath: "../config/cameraDistortion.txt"
+CameraFactor: 5000
+
+# detect
+DetectNum: 100
+CorrNum: 20
+
+# show
+DelayTime: 10
+
