@@ -22,7 +22,7 @@
 
 ## 轨迹
 
-![](/home/qie/PycharmProjects/EasySLAM/EasySLAM-fr1xyz.png)
+![](EasySLAM-fr1xyz.png)
 
 ## TODO List
 
