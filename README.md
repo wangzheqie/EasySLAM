@@ -20,6 +20,10 @@
   2. 运行 `pangolin_draw.py` 显示计算出来的轨迹
   3. 带`t_`开头的函数是测试函数，具有借鉴意义
 
+## 轨迹
+
+![](/home/qie/PycharmProjects/EasySLAM/EasySLAM-fr1xyz.png)
+
 ## TODO List
 
 1. 使用Python进程池，一边计算，一边绘图
