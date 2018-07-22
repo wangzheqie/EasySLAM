@@ -70,6 +70,7 @@ class EasySlam(object):
         self.__disparity = None
         self.__matches12 = None
         self.__3DAnd2DCoor = None  # 3D and 2D correspondences in different frame
+        self.pose_nx4x4 = []
 
         # system coordiante
         self.__baseCoor = np.eye(4)
@@ -258,8 +259,9 @@ class EasySlam(object):
         #     ax.set_ylabel("Y")
         #     ax.set_zlabel("Z")
         #     ax.scatter(0, 0, 0, c='b', marker='^')
-        pose_nx4x4 = []
-        for i in range(0, len(self.__images) - 1, 1):
+        # pose_nx4x4 = []
+
+        for i in range(0, len(self.__images) - 10, 1):
             print("now process the " + str(i) + " image...")
             self.__img1Name = self.__images[i]
             self.__img2Name = self.__images[i + 1]
@@ -277,9 +279,9 @@ class EasySlam(object):
             self.getPts3DAnd2DCorrespondences()
 
             T = self.solvePnP()
-            pose_nx4x4.append(T)
+            self.pose_nx4x4.append(T)
 
-        return pose_nx4x4
+        return self.pose_nx4x4
 
         # plt.show()
 
@@ -293,15 +295,51 @@ def loadYaml(file):
     return data
 
 
-if __name__ == "__main__":
+def t_after_run():
     config = loadYaml("../config/config.yaml")
-    # slam = EasySlam(config)
-    # slam.run()
-
-    dg = DrawGraph()
     slam = EasySlam(config)
+    pose_nx4x4 = slam.run()
+    trajatory = np.array(pose_nx4x4).reshape((-1, 1, 16)).reshape((-1, 16))
+    np.savetxt("trajectory.txt", trajatory)
+    dg = DrawGraph("Draw")
+    dg.draw(pose_nx4x4)
 
 
+def t_thread_pool():
+    config = loadYaml("../config/config.yaml")
+    pose_nx4x4 = []
+    slam = EasySlam(config)
+    dg = DrawGraph("Draw")
+
+    slamLock = threading.Lock()
+    drawLock = threading.Lock()
+
+    def drawGraph():
+        global pose_nx4x4, slam, dg
+        drawLock.acquire()
+        dg.draw(slam.pose_nx4x4)
+        slamLock.release()
+
+        drawGraph()
+
+    def runSlam():
+        global pose_nx4x4, slam, dg
+        slamLock.acquire()
+        slam.run()
+        drawLock.release()
+        runSlam()
+
+    slamLock.acquire()
+
+    t1 = threading.Thread(target=runSlam)
+    t2 = threading.Thread(target=drawGraph)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+
+def t_multi_thread():
     class slamThread(threading.Thread):
         def __init__(self, threadID, name):
             threading.Thread.__init__(self)
@@ -321,7 +359,6 @@ if __name__ == "__main__":
             dg.t_draw2()
             threadLock.release()
 
-
     threadLock = threading.Lock()
 
     threads = []
@@ -334,3 +371,7 @@ if __name__ == "__main__":
 
     for t in threads:
         t.join()
+
+
+if __name__ == "__main__":
+    t_after_run()
